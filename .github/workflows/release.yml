@@ -1,0 +1,23 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check tag matches version in code
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          grep -q "const VERSION = \"$V\"" dist/omni-o1-card.js
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/omni-o1-card.js
+          generate_release_notes: true
