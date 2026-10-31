@@ -2,7 +2,7 @@
  * Omni O1 Card – Lovelace-Karte für den xTool Omni O1 (Integration "xtool_omni")
  * https://github.com/notch001/ha-omni-o1-card
  */
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 
 const I18N = {
   de: {
@@ -16,15 +16,18 @@ const I18N = {
     tanks: "Tanks", moist1: "Befeuchtung 1", moist2: "Befeuchtung 2", waste: "Abfalltank", notInstalled: "nicht eingesetzt",
     stats: "Statistik", prints: "Drucke gesamt", printTime: "Druckzeit gesamt", uvLamp: "UV-Lampe", air: "Luftreiniger",
     ink_cyan: "Cyan", ink_magenta: "Magenta", ink_yellow: "Gelb", ink_black: "Schwarz", ink_varnish: "Lack", ink_white: "Weiß",
+    power: "Strom", pw_power: "Leistung", pw_current: "Stromstärke", pw_voltage: "Spannung", pw_today: "Heute", pw_yesterday: "Gestern",
+    pw_month: "Monat", pw_total: "Gesamt", pw_max: "Max 24 h", pw_avg: "Ø 24 h", pw_on: "An", pw_off: "Aus", pw_unavail: "nicht erreichbar", pw_toggle: "Steckdose schalten",
     noDevice: "Kein xTool-Omni-Gerät gefunden. Wähle im Editor das Gerät aus.",
     status_sleep: "Schlafmodus", status_idle: "Bereit",
     // Editor
     e_name: "Titel", e_device: "Gerät", e_heads: "Druckköpfe", e_layout: "Layout", e_density: "Dichte", e_accent: "Akzentfarbe (z. B. #19b8a6)",
     e_sections: "Angezeigte Bereiche", e_ink_style: "Tintenanzeige", e_ink_line: "Tintenlinie (bei zwei Druckköpfen)",
     e_ink_unit: "Füllstand als", e_warn: "Warnung unter (%)", e_ink: "Tinte",
+    e_power: "Messsteckdose", e_power_device: "Steckdosen-Gerät (findet Entitäten automatisch)", e_power_entity: "Leistung", e_current_entity: "Stromstärke", e_voltage_entity: "Spannung", e_energy_today_entity: "Energie heute", e_energy_yesterday_entity: "Energie gestern", e_energy_month_entity: "Energie Monat", e_energy_total_entity: "Energie gesamt", e_power_switch: "Schalter",
     o_auto: "Automatisch", o_one: "1 · nur UV", o_two: "2 · UV + DTG", o_stack: "Einspaltig", o_comfortable: "Luftig", o_compact: "Kompakt",
     o_tubes: "Kartuschen", o_bars: "Balken", o_both: "Beides", o_hero: "Status & Auftrag", o_safety: "Sicherheit", o_climate: "Klima",
-    o_ink: "Tinte", o_tanks: "Tanks", o_stats: "Statistik",
+    o_ink: "Tinte", o_tanks: "Tanks", o_stats: "Statistik", o_power: "Strom (Messsteckdose)",
   },
   en: {
     online: "Online", offline: "Offline", sleep: "Sleep", idle: "Ready", printing: "Printing", alarm: "Alarm",
@@ -37,18 +40,21 @@ const I18N = {
     tanks: "Tanks", moist1: "Moisturizing 1", moist2: "Moisturizing 2", waste: "Waste tank", notInstalled: "not installed",
     stats: "Statistics", prints: "Total prints", printTime: "Total print time", uvLamp: "UV lamp", air: "Air purifier",
     ink_cyan: "Cyan", ink_magenta: "Magenta", ink_yellow: "Yellow", ink_black: "Black", ink_varnish: "Varnish", ink_white: "White",
+    power: "Power", pw_power: "Power", pw_current: "Current", pw_voltage: "Voltage", pw_today: "Today", pw_yesterday: "Yesterday",
+    pw_month: "Month", pw_total: "Total", pw_max: "Max 24 h", pw_avg: "Avg 24 h", pw_on: "On", pw_off: "Off", pw_unavail: "unreachable", pw_toggle: "Toggle socket",
     noDevice: "No xTool Omni device found. Pick the device in the editor.",
     status_sleep: "Sleep", status_idle: "Ready",
     e_name: "Title", e_device: "Device", e_heads: "Print heads", e_layout: "Layout", e_density: "Density", e_accent: "Accent color (e.g. #19b8a6)",
     e_sections: "Visible sections", e_ink_style: "Ink display", e_ink_line: "Ink line (with two print heads)",
     e_ink_unit: "Fill level as", e_warn: "Warn below (%)", e_ink: "Ink",
+    e_power: "Power meter socket", e_power_device: "Socket device (finds entities automatically)", e_power_entity: "Power", e_current_entity: "Current", e_voltage_entity: "Voltage", e_energy_today_entity: "Energy today", e_energy_yesterday_entity: "Energy yesterday", e_energy_month_entity: "Energy month", e_energy_total_entity: "Energy total", e_power_switch: "Switch",
     o_auto: "Automatic", o_one: "1 · UV only", o_two: "2 · UV + DTG", o_stack: "Single column", o_comfortable: "Comfortable", o_compact: "Compact",
     o_tubes: "Cartridges", o_bars: "Bars", o_both: "Both", o_hero: "Status & job", o_safety: "Safety", o_climate: "Climate",
-    o_ink: "Ink", o_tanks: "Tanks", o_stats: "Statistics",
+    o_ink: "Ink", o_tanks: "Tanks", o_stats: "Statistics", o_power: "Power (meter socket)",
   },
 };
 
-const SECTIONS = ["hero", "safety", "climate", "ink", "tanks", "stats"];
+const SECTIONS = ["hero", "safety", "climate", "ink", "tanks", "power", "stats"];
 const INKS = ["cyan", "magenta", "yellow", "black", "varnish", "white"];
 const INK_META = {
   cyan: ["C", "#12b5e5"], magenta: ["M", "#e5309a"], yellow: ["Y", "#f4c20d"],
@@ -95,13 +101,13 @@ ha-card { overflow: hidden; }
 .sec > h3, .sec h3.sub-h { margin: 0 0 10px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .sec h3.sub-h.n { margin-top: 16px; }
 .side { display: contents; }
-@container omni (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } .s-hero, .s-safety, .s-ink, .s-stats { grid-column: 1 / -1; } }
+@container omni (min-width: 560px) { .grid { grid-template-columns: 1fr 1fr; } .s-hero, .s-safety, .s-ink, .s-power, .s-stats { grid-column: 1 / -1; } }
 @container omni (min-width: 900px) {
   .grid { grid-template-columns: repeat(12, 1fr); }
   .omni:not([data-layout=stack]) .s-hero { grid-column: span 5; } .omni:not([data-layout=stack]) .s-safety { grid-column: span 7; }
   .omni:not([data-layout=stack]) .s-ink { grid-column: span 7; }
   .omni:not([data-layout=stack]) .side { display: flex; flex-direction: column; gap: var(--gap); grid-column: span 5; }
-  .omni:not([data-layout=stack]) .side .sec { flex: 1; } .omni:not([data-layout=stack]) .s-stats { grid-column: 1 / -1; }
+  .omni:not([data-layout=stack]) .side .sec { flex: 1; } .omni:not([data-layout=stack]) .s-stats, .omni:not([data-layout=stack]) .s-power { grid-column: 1 / -1; }
 }
 .omni[data-layout=stack] .grid { grid-template-columns: 1fr; } .omni[data-layout=stack] .grid > * { grid-column: auto !important; } .omni[data-layout=stack] .side { display: contents; }
 .hero { display: flex; gap: 14px; align-items: center; }
@@ -152,6 +158,9 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; } .stats .m .n { font-size: 22px; }
 .omni[data-offline] .grid { opacity: .6; }
 .msg { padding: 16px; color: var(--muted); }
+.metrics.pw { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 12px; } .m.big .n { font-size: 34px; color: var(--accent); }
+@container omni (min-width: 560px) { .m.big { grid-column: span 2; } }
+button.pill { border: 0; cursor: pointer; font: inherit; font-size: 11px; font-weight: 600; color: var(--fg); } button.pill:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 `;
 
 class OmniO1Card extends HTMLElement {
@@ -191,6 +200,23 @@ class OmniO1Card extends HTMLElement {
     for (const [key, [domain, re]] of Object.entries(MAP)) {
       map[key] = ov[key] || ids.find((id) => id.startsWith(domain + ".") && re.test(id));
     }
+    /* Messsteckdose: über das gewählte Gerät automatisch, einzelne Entitäten per Konfiguration */
+    const dev = cfg.power_device_id && hass.entities ? Object.keys(hass.states).filter((id) => hass.entities[id]?.device_id === cfg.power_device_id) : [];
+    const dc = (id) => hass.states[id]?.attributes?.device_class;
+    const pick = (dom, re, cls) => dev.find((id) => id.startsWith(dom + ".") && (re.test(id) || (cls && dc(id) === cls && !/_(max|durchschnitt|avg|today|heute|yesterday|gestern|month|monat)/.test(id))));
+    const PW = {
+      pw_power: [cfg.power_entity, () => pick("sensor", /_(power|leistung)$/, "power")],
+      pw_current: [cfg.current_entity, () => pick("sensor", /_(current|stromstaerke|stromstärke)$/, "current")],
+      pw_voltage: [cfg.voltage_entity, () => pick("sensor", /_(voltage|spannung)$/, "voltage")],
+      pw_today: [cfg.energy_today_entity, () => pick("sensor", /_(energy|energie)_(today|heute)$/)],
+      pw_yesterday: [cfg.energy_yesterday_entity, () => pick("sensor", /_(energy|energie)_(yesterday|gestern)$/)],
+      pw_month: [cfg.energy_month_entity, () => pick("sensor", /_(energy|energie)_(month|monat)$/)],
+      pw_total: [cfg.energy_total_entity, () => pick("sensor", /_(energy|energie)$/)],
+      pw_max: [cfg.power_max_entity, () => pick("sensor", /(leistung|power)_max/)],
+      pw_avg: [cfg.power_avg_entity, () => pick("sensor", /(leistung|power)_(durchschnitt|avg|average)/)],
+      pw_switch: [cfg.power_switch, () => dev.find((id) => id.startsWith("switch.") && !/network_indicator|outlet_control_protect|child_lock|led/.test(id))],
+    };
+    for (const [k, [explicit, auto]] of Object.entries(PW)) map[k] = ov[k] || explicit || auto();
     return map;
   }
 
@@ -292,17 +318,32 @@ class OmniO1Card extends HTMLElement {
     const stat = (k, label, unit, d) => { const v = num(k); return v === null ? "" : `<div class="m" ${more(k)}><div class="n">${this._fmt(v, d)}<small>${unit}</small></div><div class="l">${label}</div></div>`; };
     const stats = `<section class="sec s-stats"><h3>${t("stats")}</h3><div class="stats">${stat("prints", t("prints"), "", 0)}${stat("print_time", t("printTime"), "h", 2)}${stat("uv_lamp", t("uvLamp"), "h", 2)}${stat("air", t("air"), "h", 2)}</div></section>`;
 
+    const PWK = [["pw_power", "W", 1, true], ["pw_current", "A", 2], ["pw_voltage", "V", 0], ["pw_today", "kWh", 2], ["pw_yesterday", "kWh", 2], ["pw_month", "kWh", 2], ["pw_total", "kWh", 2], ["pw_max", "W", 0], ["pw_avg", "W", 0]];
+    const pwItems = PWK.map(([k, def, d, big]) => {
+      const s = st(k); if (!s) return "";
+      const v = isNum(s.state) ? Number(s.state) : null, unit = s.attributes?.unit_of_measurement || def;
+      return `<div class="m ${big ? "big" : ""}" ${more(k)}><div class="n">${v === null ? "—" : this._fmt(v, d)}<small>${v === null ? "" : esc(unit)}</small></div><div class="l">${t(k)}</div></div>`;
+    }).join("");
+    const sw = st("pw_switch");
+    const swOn = sw?.state === "on", swOff = sw?.state === "off";
+    const powerAll = ["pw_power", "pw_current", "pw_voltage", "pw_today"].map(st).filter(Boolean);
+    const unreachable = powerAll.length && powerAll.every((x) => ["unavailable", "unknown"].includes(x.state));
+    const power = pwItems || sw ? `<section class="sec s-power"><h3>${t("power")}${sw ? `<button class="pill pw-sw" data-s="${swOn ? "ok" : ""}" data-toggle="${esc(ents.pw_switch)}" title="${t("pw_toggle")}">${swOn ? t("pw_on") : swOff ? t("pw_off") : t("pw_unavail")}</button>` : unreachable ? `<span class="seg-mini">${t("pw_unavail")}</span>` : ""}</h3>
+      <div class="metrics pw">${pwItems}</div></section>` : "";
+
     const side = (S.has("climate") ? climate : "") + (S.has("tanks") ? tanks : "");
     const accent = cfg.accent_color ? `--omni-accent:${esc(cfg.accent_color)};` : "";
     this.shadowRoot.innerHTML = `<style>${STYLE}</style><ha-card>
       <div class="omni" style="${accent}" data-layout="${esc(cfg.layout)}" data-density="${esc(cfg.density)}" ${offline ? "data-offline" : ""}>
       ${cfg.name ? `<div class="title">${esc(cfg.name)}</div>` : ""}
-      <div class="grid">${S.has("hero") ? hero : ""}${S.has("safety") ? safety : ""}${S.has("ink") ? ink : ""}${side ? `<div class="side">${side}</div>` : ""}${S.has("stats") ? stats : ""}</div></div></ha-card>`;
+      <div class="grid">${S.has("hero") ? hero : ""}${S.has("safety") ? safety : ""}${S.has("ink") ? ink : ""}${S.has("power") ? power : ""}${side ? `<div class="side">${side}</div>` : ""}${S.has("stats") ? stats : ""}</div></div></ha-card>`;
   }
 
   _click(e) {
     const press = e.target.closest?.("[data-press]");
     if (press) { this._hass.callService("button", "press", { entity_id: press.dataset.press }); return; }
+    const tog = e.target.closest?.("[data-toggle]");
+    if (tog) { this._hass.callService("homeassistant", "toggle", { entity_id: tog.dataset.toggle }); return; }
     const more = e.target.closest?.("[data-more]");
     if (more) this.dispatchEvent(new CustomEvent("hass-more-info", { bubbles: true, composed: true, detail: { entityId: more.dataset.more } }));
   }
@@ -325,6 +366,11 @@ class OmniO1CardEditor extends HTMLElement {
       ] },
       { name: "accent_color", selector: { text: {} } },
       { name: "sections", selector: { select: { multiple: true, mode: "list", options: SECTIONS.map((s) => ({ value: s, label: t("o_" + s) })) } } },
+      { type: "expandable", name: "", title: t("e_power"), schema: [
+        { name: "power_device_id", selector: { device: {} } },
+        ...[["power_entity", "sensor"], ["current_entity", "sensor"], ["voltage_entity", "sensor"], ["energy_today_entity", "sensor"], ["energy_yesterday_entity", "sensor"], ["energy_month_entity", "sensor"], ["energy_total_entity", "sensor"], ["power_switch", "switch"]]
+          .map(([name, domain]) => ({ name, selector: { entity: { domain } } })),
+      ] },
       { type: "expandable", name: "", title: t("e_ink"), schema: [
         { name: "ink_style", selector: opts([["tubes", "o_tubes"], ["bars", "o_bars"]]) },
         { name: "ink_line", selector: opts([["auto", "o_auto"], ["UV", "UV"], ["DTG", "DTG"]]) },
@@ -346,7 +392,7 @@ class OmniO1CardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     const t = (k) => (this._hass.language || "de").startsWith("de") ? I18N.de[k] : I18N.en[k];
-    const labels = { name: "e_name", device_id: "e_device", heads: "e_heads", layout: "e_layout", density: "e_density", accent_color: "e_accent", sections: "e_sections", ink_style: "e_ink_style", ink_line: "e_ink_line", ink_unit: "e_ink_unit", warn_below: "e_warn" };
+    const labels = { name: "e_name", device_id: "e_device", heads: "e_heads", layout: "e_layout", density: "e_density", accent_color: "e_accent", sections: "e_sections", ink_style: "e_ink_style", ink_line: "e_ink_line", ink_unit: "e_ink_unit", warn_below: "e_warn", power_device_id: "e_power_device", power_entity: "e_power_entity", current_entity: "e_current_entity", voltage_entity: "e_voltage_entity", energy_today_entity: "e_energy_today_entity", energy_yesterday_entity: "e_energy_yesterday_entity", energy_month_entity: "e_energy_month_entity", energy_total_entity: "e_energy_total_entity", power_switch: "e_power_switch" };
     this._form.hass = this._hass;
     this._form.data = { heads: "auto", layout: "auto", density: "comfortable", ink_style: "tubes", ink_line: "auto", ink_unit: "ml", warn_below: 15, sections: SECTIONS.slice(), ...this._config, heads: String(this._config.heads ?? "auto") };
     this._form.schema = this._schema();
