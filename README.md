@@ -4,6 +4,10 @@ Lovelace-Karte für den **xTool Omni O1** (Integration [`ha-xtool-omni`](https:/
 Zeigt Status und Job, Sicherheit (Deckel, Türen, Filter, Alarm), Klima, UV-/DTG-Tinte, Tanks, Statistik und optional die Werte einer Messsteckdose.
 Passt sich automatisch an Handy, Tablet und PC an, folgt dem Home-Assistant-Theme (hell/dunkel) und lässt sich im visuellen Editor einstellen.
 
+![Omni O1 Card am PC](docs/screenshot-pc.png)
+
+<img src="docs/screenshot-phone.png" alt="Omni O1 Card am Handy" width="320"> <img src="docs/screenshot-tablet-two-heads.png" alt="Omni O1 Card am Tablet mit zwei Druckköpfen" width="420">
+
 Funktioniert mit der Variante mit **einem Druckkopf (UV)** und mit **zwei Druckköpfen (UV + DTG)**.
 
 ## Installation mit HACS
