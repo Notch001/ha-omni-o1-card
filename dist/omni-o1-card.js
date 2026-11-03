@@ -2,7 +2,7 @@
  * Omni O1 Card – Lovelace-Karte für den xTool Omni O1 (Integration "xtool_omni")
  * https://github.com/notch001/ha-omni-o1-card
  */
-const VERSION = "0.2.0";
+const VERSION = "0.3.0";
 
 const I18N = {
   de: {
@@ -12,7 +12,7 @@ const I18N = {
     safety: "Sicherheit", lid: "Deckel", door1: "Tür 1", door2: "Tür 2", filter: "Filter", alarmL: "Alarm",
     open: "offen", closed: "geschlossen", installed: "eingesetzt", missing: "fehlt", none: "keiner", active: "aktiv",
     climate: "Klima", room: "Raum", humidity: "Luftfeuchte", head: "Druckkopf", head1: "Druckkopf 1 (UV)", head2: "Druckkopf 2 (DTG)",
-    ink: "Tinte", head1s: "Druckkopf 1", head2s: "Druckkopf 2",
+    ink: "Tinte", head1s: "Druckkopf 1", head2s: "Druckkopf 2", used24: "Verbrauch 24 h", usedTotal: "Gesamt",
     tanks: "Tanks", moist1: "Befeuchtung 1", moist2: "Befeuchtung 2", waste: "Abfalltank", notInstalled: "nicht eingesetzt",
     stats: "Statistik", prints: "Drucke gesamt", printTime: "Druckzeit gesamt", uvLamp: "UV-Lampe", air: "Luftreiniger",
     ink_cyan: "Cyan", ink_magenta: "Magenta", ink_yellow: "Gelb", ink_black: "Schwarz", ink_varnish: "Lack", ink_white: "Weiß",
@@ -23,7 +23,7 @@ const I18N = {
     // Editor
     e_name: "Titel", e_device: "Gerät", e_heads: "Druckköpfe", e_layout: "Layout", e_density: "Dichte", e_accent: "Akzentfarbe (z. B. #19b8a6)",
     e_sections: "Angezeigte Bereiche", e_ink_style: "Tintenanzeige", e_ink_line: "Tintenlinie (bei zwei Druckköpfen)",
-    e_ink_unit: "Füllstand als", e_warn: "Warnung unter (%)", e_ink: "Tinte",
+    e_ink_unit: "Füllstand als", e_warn: "Warnung unter (%)", e_ink: "Tinte", e_ink_usage: "Verbrauch der letzten 24 h anzeigen",
     e_power: "Messsteckdose", e_power_device: "Steckdosen-Gerät (findet Entitäten automatisch)", e_power_entity: "Leistung", e_current_entity: "Stromstärke", e_voltage_entity: "Spannung", e_energy_today_entity: "Energie heute", e_energy_yesterday_entity: "Energie gestern", e_energy_month_entity: "Energie Monat", e_energy_total_entity: "Energie gesamt", e_power_switch: "Schalter",
     o_auto: "Automatisch", o_one: "1 · nur UV", o_two: "2 · UV + DTG", o_stack: "Einspaltig", o_comfortable: "Luftig", o_compact: "Kompakt",
     o_tubes: "Kartuschen", o_bars: "Balken", o_both: "Beides", o_hero: "Status & Auftrag", o_safety: "Sicherheit", o_climate: "Klima",
@@ -36,7 +36,7 @@ const I18N = {
     safety: "Safety", lid: "Lid", door1: "Door 1", door2: "Door 2", filter: "Filter", alarmL: "Alarm",
     open: "open", closed: "closed", installed: "installed", missing: "missing", none: "none", active: "active",
     climate: "Climate", room: "Room", humidity: "Humidity", head: "Print head", head1: "Print head 1 (UV)", head2: "Print head 2 (DTG)",
-    ink: "Ink", head1s: "Print head 1", head2s: "Print head 2",
+    ink: "Ink", head1s: "Print head 1", head2s: "Print head 2", used24: "Used 24 h", usedTotal: "Total",
     tanks: "Tanks", moist1: "Moisturizing 1", moist2: "Moisturizing 2", waste: "Waste tank", notInstalled: "not installed",
     stats: "Statistics", prints: "Total prints", printTime: "Total print time", uvLamp: "UV lamp", air: "Air purifier",
     ink_cyan: "Cyan", ink_magenta: "Magenta", ink_yellow: "Yellow", ink_black: "Black", ink_varnish: "Varnish", ink_white: "White",
@@ -46,7 +46,7 @@ const I18N = {
     status_sleep: "Sleep", status_idle: "Ready",
     e_name: "Title", e_device: "Device", e_heads: "Print heads", e_layout: "Layout", e_density: "Density", e_accent: "Accent color (e.g. #19b8a6)",
     e_sections: "Visible sections", e_ink_style: "Ink display", e_ink_line: "Ink line (with two print heads)",
-    e_ink_unit: "Fill level as", e_warn: "Warn below (%)", e_ink: "Ink",
+    e_ink_unit: "Fill level as", e_warn: "Warn below (%)", e_ink: "Ink", e_ink_usage: "Show usage of the last 24 h",
     e_power: "Power meter socket", e_power_device: "Socket device (finds entities automatically)", e_power_entity: "Power", e_current_entity: "Current", e_voltage_entity: "Voltage", e_energy_today_entity: "Energy today", e_energy_yesterday_entity: "Energy yesterday", e_energy_month_entity: "Energy month", e_energy_total_entity: "Energy total", e_power_switch: "Switch",
     o_auto: "Automatic", o_one: "1 · UV only", o_two: "2 · UV + DTG", o_stack: "Single column", o_comfortable: "Comfortable", o_compact: "Compact",
     o_tubes: "Cartridges", o_bars: "Bars", o_both: "Both", o_hero: "Status & job", o_safety: "Safety", o_climate: "Climate",
@@ -154,6 +154,8 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
 .ink-bars { display: grid; gap: 9px; } .bar-row { display: grid; grid-template-columns: 74px 1fr auto; gap: 10px; align-items: center; cursor: pointer; }
 .bar-row .ch { font-size: 13px; font-weight: 500; } .bar-row .meter { grid-column: auto; height: 10px; } .bar-row .meter i { background: var(--c); }
 .bar-row .vv { font-size: 12px; color: var(--muted); min-width: 92px; text-align: right; font-variant-numeric: tabular-nums; } .bar-row[data-low] .vv { color: var(--warn); } .bar-row[data-empty] { opacity: .5; }
+.bar-row.u { grid-template-columns: 74px 1fr auto auto; } .uu { font-size: 11px; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; } .cart .uu { margin-top: -3px; }
+.usage { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 12.5px; color: var(--muted); } .usage b { color: var(--fg); font-weight: 600; font-variant-numeric: tabular-nums; }
 .seg-mini { font-size: 11px; letter-spacing: .04em; font-weight: 500; text-transform: none; }
 .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; } .stats .m .n { font-size: 22px; }
 .omni[data-offline] .grid { opacity: .6; }
@@ -178,7 +180,7 @@ class OmniO1Card extends HTMLElement {
   setConfig(config) {
     if (!config) throw new Error("Ungültige Konfiguration");
     this._config = {
-      heads: "auto", layout: "auto", density: "comfortable", ink_style: "tubes", ink_line: "auto", ink_unit: "ml", warn_below: 15,
+      heads: "auto", layout: "auto", density: "comfortable", ink_style: "tubes", ink_line: "auto", ink_unit: "ml", ink_usage: true, warn_below: 15,
       sections: SECTIONS.slice(), ...config,
     };
     this._sig = "";
@@ -226,11 +228,51 @@ class OmniO1Card extends HTMLElement {
     const ents = this._resolve();
     const st = (k) => (ents[k] ? hass.states[ents[k]] : undefined);
     const used = Object.values(ents).filter(Boolean);
-    const sig = JSON.stringify([hass.language, used.map((id) => { const s = hass.states[id]; return s ? [s.state, s.attributes] : null; })]) + JSON.stringify(this._config);
+    const sig = JSON.stringify([hass.language, used.map((id) => { const s = hass.states[id]; return s ? [s.state, s.attributes] : null; })]) + JSON.stringify(this._config) + JSON.stringify(this._usage || null);
     if (sig === this._sig) return;
     this._sig = sig;
     this._ents = ents;
+    this._loadUsage(ents);
     this._render(st);
+  }
+
+  /* Verbrauch der letzten 24 h aus dem Verlauf (Recorder). Zählt nur Rückgänge des Füllstands:
+     "unavailable"/"unknown" (Verbindungsabbrüche) werden übersprungen, der letzte gültige Wert bleibt Vergleichsbasis,
+     ein Verbrauch während der Lücke wird also trotzdem erfasst. Nachfüllen/Kartuschenwechsel (Anstieg oder -1 = nicht eingesetzt) zählt nicht. */
+  static _consumed(rows) {
+    if (!Array.isArray(rows)) return null;
+    let prev = null, sum = 0;
+    for (const r of rows) {
+      const raw = r.s ?? r.state;
+      if (!isNum(raw)) continue;
+      const v = Number(raw);
+      if (v < 0) { prev = null; continue; }
+      if (prev !== null && v < prev) sum += prev - v;
+      prev = v;
+    }
+    return prev === null ? null : sum;
+  }
+
+  _loadUsage(ents) {
+    const cfg = this._config;
+    if (cfg.ink_usage === false || !(cfg.sections || SECTIONS).includes("ink") || this._usageBusy) return;
+    const ids = INKS.flatMap((c) => [ents["uv_" + c], ents["dtg_" + c]]).filter(Boolean);
+    if (!ids.length) return;
+    const key = ids.join(",");
+    if (key === this._usageKey && Date.now() < this._usageNext) return;
+    this._usageKey = key;
+    this._usageBusy = true;
+    const end = new Date(), start = new Date(end.getTime() - 864e5);
+    this._hass.callWS({ type: "history/history_during_period", start_time: start.toISOString(), end_time: end.toISOString(), entity_ids: ids,
+      include_start_time_state: true, significant_changes_only: false, minimal_response: true, no_attributes: true })
+      .then((res) => {
+        const out = {};
+        for (const id of ids) out[id] = OmniO1Card._consumed(res?.[id]);
+        this._usage = out;
+        this._usageNext = Date.now() + 10 * 60 * 1000; /* gleitendes 24-h-Fenster, alle 10 min neu */
+      })
+      .catch(() => { this._usageNext = Date.now() + 60 * 1000; /* Fehler: alten Wert behalten, in 1 min erneut */ })
+      .finally(() => { this._usageBusy = false; this._sig = ""; if (this._hass) this._update(); });
   }
 
   _fmt(n, d = 1) { return Number(n).toLocaleString(this._hass.language || "de", { minimumFractionDigits: d, maximumFractionDigits: d }); }
@@ -296,21 +338,30 @@ class OmniO1Card extends HTMLElement {
       ${wasteS ? `<div class="tank" ${wasteS.attributes?.exist === false ? "data-off" : more("waste")}><span class="t">${t("waste")}</span><span class="v">${wasteS.attributes?.exist === false ? t("notInstalled") : `${t("installed")}${wasteV !== null ? ` · ${Math.round(wasteV)} mL` : ""}`}</span></div>` : ""}</section>`;
 
     const low = Number(cfg.warn_below) || 0;
+    const showUse = cfg.ink_usage !== false;
+    const useTxt = (ml, full) => {
+      const p = full > 0 ? (ml / full) * 100 : null;
+      const mlS = `${this._fmt(ml, 1)} mL`, pS = p === null ? mlS : `${this._fmt(p, 1)} %`;
+      return cfg.ink_unit === "percent" ? pS : cfg.ink_unit === "both" && p !== null ? `${mlS} · ${pS}` : mlS;
+    };
     const inkItems = (line) => INKS.map((c) => {
       const k = line + "_" + c, s = st(k); if (!s) return null;
       const ml = isNum(s.state) ? Number(s.state) : -1, full = Number(s.attributes?.full_ml);
       const ok = s.attributes?.installed !== false && ml >= 0;
       const pct = ok ? (full > 0 ? (ml / full) * 100 : Number(s.attributes?.percent) || 0) : 0;
-      return { k, c, ok, ml, pct: Math.max(0, Math.min(100, pct)), low: ok && pct < low };
+      const use = showUse ? this._usage?.[ents[k]] ?? null : null;
+      return { k, c, ok, ml, full, use, pct: Math.max(0, Math.min(100, pct)), low: ok && pct < low };
     }).filter(Boolean);
     const lbl = (it) => cfg.ink_unit === "percent" ? `${Math.round(it.pct)} %` : cfg.ink_unit === "both" ? `${Math.round(it.ml)} mL · ${Math.round(it.pct)} %` : `${Math.round(it.ml)} mL`;
     const inkBlock = (line, i) => {
       const items = inkItems(line); if (!items.length) return "";
       const installed = items.filter((x) => x.ok).length;
       const body = cfg.ink_style === "bars"
-        ? `<div class="ink-bars">${items.map((it) => `<div class="bar-row" style="--c:${INK_META[it.c][1]}" ${it.low ? "data-low" : ""} ${it.ok ? "" : "data-empty"} ${more(it.k)}><span class="ch">${t("ink_" + it.c)}</span><div class="meter"><i style="width:${it.pct}%"></i></div><span class="vv">${it.ok ? lbl(it) : t("notInstalled")}</span></div>`).join("")}</div>`
-        : `<div class="ink-tubes">${items.map((it) => `<div class="cart" title="${t("ink_" + it.c)}" ${more(it.k)}><div class="tube" style="--c:${INK_META[it.c][1]}" ${it.low ? "data-low" : ""} ${it.ok ? "" : "data-empty"}><i style="height:${it.pct}%"></i></div><span class="ch">${INK_META[it.c][0]}</span><span class="vv">${it.ok ? (cfg.ink_unit === "both" ? Math.round(it.pct) + " %" : lbl(it).replace(" mL", "")) : "—"}</span></div>`).join("")}</div>`;
-      return `<h3 class="sub-h ${i ? "n" : ""}">${t("ink")} · ${line.toUpperCase()}<span class="seg-mini">${heads === 2 ? (line === "uv" ? t("head1s") : t("head2s")) + " · " : ""}${installed}/${items.length}</span></h3>${body}`;
+        ? `<div class="ink-bars">${items.map((it) => `<div class="bar-row ${showUse ? "u" : ""}" style="--c:${INK_META[it.c][1]}" ${it.low ? "data-low" : ""} ${it.ok ? "" : "data-empty"} ${more(it.k)}><span class="ch">${t("ink_" + it.c)}</span><div class="meter"><i style="width:${it.pct}%"></i></div><span class="vv">${it.ok ? lbl(it) : t("notInstalled")}</span>${showUse ? `<span class="uu" title="${t("used24")}">${it.use === null ? "" : "−" + this._fmt(it.use, 1)}</span>` : ""}</div>`).join("")}</div>`
+        : `<div class="ink-tubes">${items.map((it) => `<div class="cart" title="${t("ink_" + it.c)}" ${more(it.k)}><div class="tube" style="--c:${INK_META[it.c][1]}" ${it.low ? "data-low" : ""} ${it.ok ? "" : "data-empty"}><i style="height:${it.pct}%"></i></div><span class="ch">${INK_META[it.c][0]}</span><span class="vv">${it.ok ? (cfg.ink_unit === "both" ? Math.round(it.pct) + " %" : lbl(it).replace(" mL", "")) : "—"}</span>${showUse ? `<span class="uu" title="${t("used24")}">${it.use === null ? "" : "−" + this._fmt(it.use, 1)}</span>` : ""}</div>`).join("")}</div>`;
+      const uses = items.filter((x) => x.use !== null);
+      const usage = showUse && uses.length ? `<div class="usage"><span>${t("used24")}</span><b>${useTxt(uses.reduce((a, x) => a + x.use, 0), uses.every((x) => x.full > 0) ? uses.reduce((a, x) => a + x.full, 0) : 0)}</b></div>` : "";
+      return `<h3 class="sub-h ${i ? "n" : ""}">${t("ink")} · ${line.toUpperCase()}<span class="seg-mini">${heads === 2 ? (line === "uv" ? t("head1s") : t("head2s")) + " · " : ""}${installed}/${items.length}</span></h3>${body}${usage}`;
     };
     const inkHtml = lines.map(inkBlock).join("");
     const ink = inkHtml ? `<section class="sec s-ink">${inkHtml}</section>` : "";
@@ -375,6 +426,7 @@ class OmniO1CardEditor extends HTMLElement {
         { name: "ink_style", selector: opts([["tubes", "o_tubes"], ["bars", "o_bars"]]) },
         { name: "ink_line", selector: opts([["auto", "o_auto"], ["UV", "UV"], ["DTG", "DTG"]]) },
         { name: "ink_unit", selector: opts([["ml", "mL"], ["percent", "%"], ["both", "o_both"]]) },
+        { name: "ink_usage", selector: { boolean: {} } },
         { name: "warn_below", selector: { number: { min: 0, max: 90, step: 1, mode: "slider" } } },
       ] },
     ];
@@ -392,9 +444,9 @@ class OmniO1CardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     const t = (k) => (this._hass.language || "de").startsWith("de") ? I18N.de[k] : I18N.en[k];
-    const labels = { name: "e_name", device_id: "e_device", heads: "e_heads", layout: "e_layout", density: "e_density", accent_color: "e_accent", sections: "e_sections", ink_style: "e_ink_style", ink_line: "e_ink_line", ink_unit: "e_ink_unit", warn_below: "e_warn", power_device_id: "e_power_device", power_entity: "e_power_entity", current_entity: "e_current_entity", voltage_entity: "e_voltage_entity", energy_today_entity: "e_energy_today_entity", energy_yesterday_entity: "e_energy_yesterday_entity", energy_month_entity: "e_energy_month_entity", energy_total_entity: "e_energy_total_entity", power_switch: "e_power_switch" };
+    const labels = { name: "e_name", device_id: "e_device", heads: "e_heads", layout: "e_layout", density: "e_density", accent_color: "e_accent", sections: "e_sections", ink_style: "e_ink_style", ink_line: "e_ink_line", ink_unit: "e_ink_unit", ink_usage: "e_ink_usage", warn_below: "e_warn", power_device_id: "e_power_device", power_entity: "e_power_entity", current_entity: "e_current_entity", voltage_entity: "e_voltage_entity", energy_today_entity: "e_energy_today_entity", energy_yesterday_entity: "e_energy_yesterday_entity", energy_month_entity: "e_energy_month_entity", energy_total_entity: "e_energy_total_entity", power_switch: "e_power_switch" };
     this._form.hass = this._hass;
-    this._form.data = { heads: "auto", layout: "auto", density: "comfortable", ink_style: "tubes", ink_line: "auto", ink_unit: "ml", warn_below: 15, sections: SECTIONS.slice(), ...this._config, heads: String(this._config.heads ?? "auto") };
+    this._form.data = { heads: "auto", layout: "auto", density: "comfortable", ink_style: "tubes", ink_line: "auto", ink_unit: "ml", ink_usage: true, warn_below: 15, sections: SECTIONS.slice(), ...this._config, heads: String(this._config.heads ?? "auto") };
     this._form.schema = this._schema();
     this._form.computeLabel = (s) => (labels[s.name] ? t(labels[s.name]) : s.name);
   }

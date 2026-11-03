@@ -44,8 +44,11 @@ Die Entitäten werden automatisch gefunden. Optional:
 | `ink_style` | `tubes`, `bars` | `tubes` | Kartuschen oder Balken |
 | `ink_line` | `auto`, `UV`, `DTG` | `auto` | Bei zwei Druckköpfen: welche Linie(n) |
 | `ink_unit` | `ml`, `percent`, `both` | `ml` | Anzeige des Füllstands |
+| `ink_usage` | `true`, `false` | `true` | Zeigt den Tintenverbrauch der letzten 24 Stunden (je Kartusche und gesamt, auch im Leerlauf durch Spülen). Einheit folgt `ink_unit` |
 | `warn_below` | 0–90 | `15` | Kartusche wird unter diesem Prozentwert gelb markiert |
 | `entities` | Zuordnung | – | Einzelne Entitäten überschreiben, z. B. `status: sensor.mein_status` |
+
+**Verbrauch 24 h:** Die Karte liest den Verlauf der Tinten-Sensoren aus dem Recorder (gleitendes 24-h-Fenster, Aktualisierung alle 10 Minuten) und summiert die Rückgänge des Füllstands. Verbindungsabbrüche (`unavailable`/`unknown`) werden übersprungen; ein Verbrauch während einer Lücke wird beim nächsten gültigen Wert trotzdem erfasst. Nachfüllen oder ein Kartuschenwechsel zählt nicht als Verbrauch. Voraussetzung ist, dass die Tinten-Sensoren im Verlauf aufgezeichnet werden.
 
 Beispiel mit Überschreibung:
 
