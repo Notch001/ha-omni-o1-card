@@ -135,7 +135,7 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
 .chip[data-t=ok] svg { color: var(--good); } .chip[data-t=warn] { background: color-mix(in srgb, var(--warn) 18%, var(--surface2)); } .chip[data-t=warn] svg { color: var(--warn); }
 .chip[data-t=bad] { background: color-mix(in srgb, var(--bad) 20%, var(--surface2)); } .chip[data-t=bad] svg { color: var(--bad); }
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; }
-.m[data-more] { cursor: pointer; } .m .n { font-size: 26px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.m[data-more] { cursor: pointer; } .m[data-t=warn] .n { color: var(--warn); } .m[data-t=bad] .n { color: var(--bad); } .m .n { font-size: 26px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
 .m .n small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 2px; } .m .l { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
 .tank { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: end; cursor: pointer; } .tank + .tank { margin-top: 12px; }
 .tank .t { font-size: 13px; font-weight: 500; } .tank .v { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -323,7 +323,10 @@ class OmniO1Card extends HTMLElement {
       ${chip("filter", t("filter"), on("filter") ? "ok" : "warn", on("filter") ? t("installed") : t("missing"), "fan")}
       ${chip("alarm", t("alarmL"), alarm ? "bad" : "ok", alarm ? t("active") : t("none"), "alarm")}</div></section>`;
 
-    const metric = (k, label, unit, d = 1) => { const v = num(k); return v === null ? "" : `<div class="m" ${more(k)}><div class="n">${this._fmt(v, d)}<small>${unit}</small></div><div class="l">${label}</div></div>`; };
+    // Ampel: innerhalb des Bereichs normal, in den äußeren 10 % gelb, außerhalb rot
+    const trafficLight = (v, lim) => { if (!lim) return ""; const [lo, hi] = lim, m = (hi - lo) * 0.1; return v < lo || v > hi ? "bad" : (v < lo + m || v > hi - m ? "warn" : ""); };
+    const LIMITS = { temperature: [20, 35], humidity: [40, 65] };
+    const metric = (k, label, unit, d = 1) => { const v = num(k); if (v === null) return ""; const tl = trafficLight(v, LIMITS[k]); return `<div class="m" ${more(k)}${tl ? ` data-t="${tl}"` : ""}><div class="n">${this._fmt(v, d)}<small>${unit}</small></div><div class="l">${label}</div></div>`; };
     const climate = `<section class="sec s-climate"><h3>${t("climate")}</h3><div class="metrics">
       ${metric("temperature", t("room"), "°C")}${metric("humidity", t("humidity"), "%")}
       ${metric("head1", heads === 2 ? t("head1") : t("head"), "°C")}${heads === 2 ? metric("head2", t("head2"), "°C") : ""}</div></section>`;

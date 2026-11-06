@@ -48,6 +48,8 @@ Die Entitäten werden automatisch gefunden. Optional:
 | `warn_below` | 0–90 | `15` | Kartusche wird unter diesem Prozentwert gelb markiert |
 | `entities` | Zuordnung | – | Einzelne Entitäten überschreiben, z. B. `status: sensor.mein_status` |
 
+**Klima-Ampel:** Raumtemperatur (20–35 °C) und Luftfeuchte (40–65 %) werden im Klima-Bereich farbig angezeigt: normal innerhalb des Bereichs, gelb in den äußeren 10 % nahe der Grenzwerte (Temperatur unter 22,5 °C bzw. über 32,5 °C, Luftfeuchte unter 42,5 % bzw. über 62,5 %), rot außerhalb.
+
 **Verbrauch 24 h:** Die Karte liest den Verlauf der Tinten-Sensoren aus dem Recorder (gleitendes 24-h-Fenster, Aktualisierung alle 10 Minuten) und summiert die Rückgänge des Füllstands. Verbindungsabbrüche (`unavailable`/`unknown`) werden übersprungen; ein Verbrauch während einer Lücke wird beim nächsten gültigen Wert trotzdem erfasst. Nachfüllen oder ein Kartuschenwechsel zählt nicht als Verbrauch. Voraussetzung ist, dass die Tinten-Sensoren im Verlauf aufgezeichnet werden.
 
 Beispiel mit Überschreibung:
