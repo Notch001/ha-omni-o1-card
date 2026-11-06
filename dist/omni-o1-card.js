@@ -2,7 +2,7 @@
  * Omni O1 Card – Lovelace-Karte für den xTool Omni O1 (Integration "xtool_omni")
  * https://github.com/notch001/ha-omni-o1-card
  */
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 
 const I18N = {
   de: {
@@ -24,6 +24,7 @@ const I18N = {
     e_name: "Titel", e_device: "Gerät", e_heads: "Druckköpfe", e_layout: "Layout", e_density: "Dichte", e_accent: "Akzentfarbe (z. B. #19b8a6)",
     e_sections: "Angezeigte Bereiche", e_ink_style: "Tintenanzeige", e_ink_line: "Tintenlinie (bei zwei Druckköpfen)",
     e_ink_unit: "Füllstand als", e_warn: "Warnung unter (%)", e_ink: "Tinte", e_ink_usage: "Verbrauch der letzten 24 h anzeigen",
+    e_climate: "Klima-Ampel (eigene Sensoren)", e_climate_temp: "Temperatursensor (20–35 °C)", e_climate_humidity: "Luftfeuchtesensor (40–65 %)",
     e_power: "Messsteckdose", e_power_device: "Steckdosen-Gerät (findet Entitäten automatisch)", e_power_entity: "Leistung", e_current_entity: "Stromstärke", e_voltage_entity: "Spannung", e_energy_today_entity: "Energie heute", e_energy_yesterday_entity: "Energie gestern", e_energy_month_entity: "Energie Monat", e_energy_total_entity: "Energie gesamt", e_power_switch: "Schalter",
     o_auto: "Automatisch", o_one: "1 · nur UV", o_two: "2 · UV + DTG", o_stack: "Einspaltig", o_comfortable: "Luftig", o_compact: "Kompakt",
     o_tubes: "Kartuschen", o_bars: "Balken", o_both: "Beides", o_hero: "Status & Auftrag", o_safety: "Sicherheit", o_climate: "Klima",
@@ -47,6 +48,7 @@ const I18N = {
     e_name: "Title", e_device: "Device", e_heads: "Print heads", e_layout: "Layout", e_density: "Density", e_accent: "Accent color (e.g. #19b8a6)",
     e_sections: "Visible sections", e_ink_style: "Ink display", e_ink_line: "Ink line (with two print heads)",
     e_ink_unit: "Fill level as", e_warn: "Warn below (%)", e_ink: "Ink", e_ink_usage: "Show usage of the last 24 h",
+    e_climate: "Climate traffic light (own sensors)", e_climate_temp: "Temperature sensor (20–35 °C)", e_climate_humidity: "Humidity sensor (40–65 %)",
     e_power: "Power meter socket", e_power_device: "Socket device (finds entities automatically)", e_power_entity: "Power", e_current_entity: "Current", e_voltage_entity: "Voltage", e_energy_today_entity: "Energy today", e_energy_yesterday_entity: "Energy yesterday", e_energy_month_entity: "Energy month", e_energy_total_entity: "Energy total", e_power_switch: "Switch",
     o_auto: "Automatic", o_one: "1 · UV only", o_two: "2 · UV + DTG", o_stack: "Single column", o_comfortable: "Comfortable", o_compact: "Compact",
     o_tubes: "Cartridges", o_bars: "Bars", o_both: "Both", o_hero: "Status & job", o_safety: "Safety", o_climate: "Climate",
@@ -135,7 +137,7 @@ svg.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-widt
 .chip[data-t=ok] svg { color: var(--good); } .chip[data-t=warn] { background: color-mix(in srgb, var(--warn) 18%, var(--surface2)); } .chip[data-t=warn] svg { color: var(--warn); }
 .chip[data-t=bad] { background: color-mix(in srgb, var(--bad) 20%, var(--surface2)); } .chip[data-t=bad] svg { color: var(--bad); }
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 10px; }
-.m[data-more] { cursor: pointer; } .m .n { font-size: 26px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.m[data-more] { cursor: pointer; } .m[data-t=warn] .n { color: var(--warn); } .m[data-t=bad] .n { color: var(--bad); } .m .n { font-size: 26px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
 .m .n small { font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 2px; } .m .l { font-size: 11.5px; color: var(--muted); margin-top: 3px; }
 .tank { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: end; cursor: pointer; } .tank + .tank { margin-top: 12px; }
 .tank .t { font-size: 13px; font-weight: 500; } .tank .v { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -202,6 +204,9 @@ class OmniO1Card extends HTMLElement {
     for (const [key, [domain, re]] of Object.entries(MAP)) {
       map[key] = ov[key] || ids.find((id) => id.startsWith(domain + ".") && re.test(id));
     }
+    /* Eigene Klima-Sensoren (Raum) ersetzen die Werte des Geräts und aktivieren die Ampel */
+    if (cfg.climate_temp_entity) map.temperature = cfg.climate_temp_entity;
+    if (cfg.climate_humidity_entity) map.humidity = cfg.climate_humidity_entity;
     /* Messsteckdose: über das gewählte Gerät automatisch, einzelne Entitäten per Konfiguration */
     const dev = cfg.power_device_id && hass.entities ? Object.keys(hass.states).filter((id) => hass.entities[id]?.device_id === cfg.power_device_id) : [];
     const dc = (id) => hass.states[id]?.attributes?.device_class;
@@ -323,7 +328,10 @@ class OmniO1Card extends HTMLElement {
       ${chip("filter", t("filter"), on("filter") ? "ok" : "warn", on("filter") ? t("installed") : t("missing"), "fan")}
       ${chip("alarm", t("alarmL"), alarm ? "bad" : "ok", alarm ? t("active") : t("none"), "alarm")}</div></section>`;
 
-    const metric = (k, label, unit, d = 1) => { const v = num(k); return v === null ? "" : `<div class="m" ${more(k)}><div class="n">${this._fmt(v, d)}<small>${unit}</small></div><div class="l">${label}</div></div>`; };
+    // Ampel: innerhalb des Bereichs normal, in den äußeren 10 % gelb, außerhalb rot
+    const trafficLight = (v, lim) => { if (!lim) return ""; const [lo, hi] = lim, m = (hi - lo) * 0.1; return v < lo || v > hi ? "bad" : (v < lo + m || v > hi - m ? "warn" : ""); };
+    const LIMITS = { temperature: cfg.climate_temp_entity ? [20, 35] : null, humidity: cfg.climate_humidity_entity ? [40, 65] : null };
+    const metric = (k, label, unit, d = 1) => { const v = num(k); if (v === null) return ""; const tl = trafficLight(v, LIMITS[k]); return `<div class="m" ${more(k)}${tl ? ` data-t="${tl}"` : ""}><div class="n">${this._fmt(v, d)}<small>${unit}</small></div><div class="l">${label}</div></div>`; };
     const climate = `<section class="sec s-climate"><h3>${t("climate")}</h3><div class="metrics">
       ${metric("temperature", t("room"), "°C")}${metric("humidity", t("humidity"), "%")}
       ${metric("head1", heads === 2 ? t("head1") : t("head"), "°C")}${heads === 2 ? metric("head2", t("head2"), "°C") : ""}</div></section>`;
@@ -422,6 +430,10 @@ class OmniO1CardEditor extends HTMLElement {
         ...[["power_entity", "sensor"], ["current_entity", "sensor"], ["voltage_entity", "sensor"], ["energy_today_entity", "sensor"], ["energy_yesterday_entity", "sensor"], ["energy_month_entity", "sensor"], ["energy_total_entity", "sensor"], ["power_switch", "switch"]]
           .map(([name, domain]) => ({ name, selector: { entity: { domain } } })),
       ] },
+      { type: "expandable", name: "", title: t("e_climate"), schema: [
+        { name: "climate_temp_entity", selector: { entity: { domain: "sensor", device_class: "temperature" } } },
+        { name: "climate_humidity_entity", selector: { entity: { domain: "sensor", device_class: "humidity" } } },
+      ] },
       { type: "expandable", name: "", title: t("e_ink"), schema: [
         { name: "ink_style", selector: opts([["tubes", "o_tubes"], ["bars", "o_bars"]]) },
         { name: "ink_line", selector: opts([["auto", "o_auto"], ["UV", "UV"], ["DTG", "DTG"]]) },
@@ -444,7 +456,7 @@ class OmniO1CardEditor extends HTMLElement {
       this.appendChild(this._form);
     }
     const t = (k) => (this._hass.language || "de").startsWith("de") ? I18N.de[k] : I18N.en[k];
-    const labels = { name: "e_name", device_id: "e_device", heads: "e_heads", layout: "e_layout", density: "e_density", accent_color: "e_accent", sections: "e_sections", ink_style: "e_ink_style", ink_line: "e_ink_line", ink_unit: "e_ink_unit", ink_usage: "e_ink_usage", warn_below: "e_warn", power_device_id: "e_power_device", power_entity: "e_power_entity", current_entity: "e_current_entity", voltage_entity: "e_voltage_entity", energy_today_entity: "e_energy_today_entity", energy_yesterday_entity: "e_energy_yesterday_entity", energy_month_entity: "e_energy_month_entity", energy_total_entity: "e_energy_total_entity", power_switch: "e_power_switch" };
+    const labels = { name: "e_name", device_id: "e_device", heads: "e_heads", layout: "e_layout", density: "e_density", accent_color: "e_accent", sections: "e_sections", ink_style: "e_ink_style", ink_line: "e_ink_line", ink_unit: "e_ink_unit", ink_usage: "e_ink_usage", warn_below: "e_warn", power_device_id: "e_power_device", power_entity: "e_power_entity", current_entity: "e_current_entity", voltage_entity: "e_voltage_entity", energy_today_entity: "e_energy_today_entity", energy_yesterday_entity: "e_energy_yesterday_entity", energy_month_entity: "e_energy_month_entity", energy_total_entity: "e_energy_total_entity", power_switch: "e_power_switch", climate_temp_entity: "e_climate_temp", climate_humidity_entity: "e_climate_humidity" };
     this._form.hass = this._hass;
     this._form.data = { heads: "auto", layout: "auto", density: "comfortable", ink_style: "tubes", ink_line: "auto", ink_unit: "ml", ink_usage: true, warn_below: 15, sections: SECTIONS.slice(), ...this._config, heads: String(this._config.heads ?? "auto") };
     this._form.schema = this._schema();

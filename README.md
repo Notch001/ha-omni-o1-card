@@ -46,7 +46,10 @@ Die Entitäten werden automatisch gefunden. Optional:
 | `ink_unit` | `ml`, `percent`, `both` | `ml` | Anzeige des Füllstands |
 | `ink_usage` | `true`, `false` | `true` | Zeigt den Tintenverbrauch der letzten 24 Stunden (je Kartusche und gesamt, auch im Leerlauf durch Spülen). Einheit folgt `ink_unit` |
 | `warn_below` | 0–90 | `15` | Kartusche wird unter diesem Prozentwert gelb markiert |
+| `climate_temp_entity` / `climate_humidity_entity` | Entität | – | Eigener Temperatur-/Luftfeuchtesensor für den Klima-Bereich, aktiviert die Ampel (siehe unten) |
 | `entities` | Zuordnung | – | Einzelne Entitäten überschreiben, z. B. `status: sensor.mein_status` |
+
+**Klima-Ampel:** Nur wenn du eigene Sensoren angibst (`climate_temp_entity` und/oder `climate_humidity_entity`, im Editor unter „Klima-Ampel“), zeigt der Klima-Bereich diese Sensoren statt der Gerätewerte und färbt sie: normal innerhalb des Bereichs, gelb in den äußeren 10 % nahe der Grenzwerte, rot außerhalb. Grenzwerte: Temperatur 20–35 °C (gelb unter 22,5 °C / über 32,5 °C), Luftfeuchte 40–65 % (gelb unter 42,5 % / über 62,5 %). Ohne eigenen Sensor bleibt der jeweilige Wert ungefärbt. Jeder Sensor wird einzeln betrachtet.
 
 **Verbrauch 24 h:** Die Karte liest den Verlauf der Tinten-Sensoren aus dem Recorder (gleitendes 24-h-Fenster, Aktualisierung alle 10 Minuten) und summiert die Rückgänge des Füllstands. Verbindungsabbrüche (`unavailable`/`unknown`) werden übersprungen; ein Verbrauch während einer Lücke wird beim nächsten gültigen Wert trotzdem erfasst. Nachfüllen oder ein Kartuschenwechsel zählt nicht als Verbrauch. Voraussetzung ist, dass die Tinten-Sensoren im Verlauf aufgezeichnet werden.
 
