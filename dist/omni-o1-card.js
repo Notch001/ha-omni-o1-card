@@ -2,7 +2,7 @@
  * Omni O1 Card – Lovelace-Karte für den xTool Omni O1 (Integration "xtool_omni")
  * https://github.com/notch001/ha-omni-o1-card
  */
-const VERSION = "0.3.0";
+const VERSION = "0.4.0";
 
 const I18N = {
   de: {
